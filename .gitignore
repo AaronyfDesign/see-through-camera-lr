@@ -1,0 +1,3 @@
+.DS_Store
+src/SeeThroughCamera.lrplugin/output/*
+!src/SeeThroughCamera.lrplugin/output/.gitkeep
