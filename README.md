@@ -55,7 +55,7 @@ a new profile in the CLI repo — no plugin change needed.
 
 ## Requirements
 
-- Lightroom Classic (developed and verified on 15.4.1, macOS arm64)
+- Lightroom Classic (developed and verified on 15.4.1; macOS arm64 and Windows both supported)
 - Python 3 with Pillow (the CLI's dependency)
 - A local checkout of [see-through-camera](https://github.com/AaronyfDesign/see-through-camera)
 
@@ -85,6 +85,21 @@ Prerequisites: a local clone of [see-through-camera](https://github.com/AaronyfD
 
 2. In Lightroom: select a photo → **File → Plugin Extras → See-Through:
    生成回屏卡片（…）**. The card opens in Finder when done.
+
+### Windows
+
+Same prerequisites; use the PowerShell installer instead of
+`install.sh`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\install.ps1
+```
+
+It copies the plugin into `%APPDATA%\Adobe\Lightroom\Modules\`
+(Lightroom auto-loads plugins from there — no preference registration
+needed) and generates `Config.lua` with your paths. Overrides are the
+same two environment variables. Uninstall on Windows: delete the plugin
+folder from `Modules`.
 
 ## Uninstall
 

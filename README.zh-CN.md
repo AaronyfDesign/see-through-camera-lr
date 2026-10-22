@@ -51,7 +51,7 @@ profile，插件无需改动。
 
 ## 环境要求
 
-- Lightroom Classic（在 15.4.1 / macOS arm64 上开发验证）
+- Lightroom Classic（在 15.4.1 上开发验证；macOS arm64 与 Windows 均支持）
 - Python 3 及 Pillow（CLI 的依赖）
 - 本地有 [see-through-camera](https://github.com/AaronyfDesign/see-through-camera) 仓库
 
@@ -80,6 +80,19 @@ profile，插件无需改动。
 
 2. 在 Lightroom 里选中一张照片 → **文件 → 增效工具额外信息 →
    See-Through: 生成回屏卡片（…）**，完成后卡片在 Finder 中打开。
+
+### Windows
+
+前提相同，安装改用 PowerShell 脚本：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\install.ps1
+```
+
+脚本把插件复制到 `%APPDATA%\Adobe\Lightroom\Modules\`（LR 会自动
+加载该目录下的插件，无需额外注册），并生成写好本机路径的
+`Config.lua`；两个环境变量覆盖项与 macOS 相同。Windows 上卸载直接
+删除 Modules 里的插件文件夹。
 
 ## 卸载
 
