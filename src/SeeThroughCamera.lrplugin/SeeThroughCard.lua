@@ -15,6 +15,7 @@ local LrExportSession = import 'LrExportSession'
 local LrFileUtils = import 'LrFileUtils'
 local LrPathUtils = import 'LrPathUtils'
 local LrProgressScope = import 'LrProgressScope'
+local LrShell = import 'LrShell'
 local LrTasks = import 'LrTasks'
 local LrDate = import 'LrDate'
 
@@ -118,7 +119,9 @@ local function makeCard(bgMode)
     progress:done()
     if status == 0 then
       dbg('card written: ' .. outPath)
-      LrDialogs.showInFinder(outPath)
+      -- NOTE: LrDialogs has no showInFinder (verified against LR 15.4.1's
+      -- bundled LrDialogs.lua) — LrShell.revealInShell is the real API.
+      LrShell.revealInShell(outPath)
     else
       LrDialogs.message('See-Through Camera',
         '渲染失败，详见 output/cli.log 与 output/debug.txt')
