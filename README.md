@@ -61,6 +61,19 @@ a new profile in the CLI repo — no plugin change needed.
 
 ## Install
 
+> **Dependencies (read this first): the plugin is only a dispatcher —
+> the card is actually rendered by an external Python CLI. Every
+> install method requires:**
+> 1. **Python 3** (3.9+) on PATH, or set explicitly via environment
+>    variable;
+> 2. **Pillow**: `python -m pip install Pillow` — without it card
+>    generation will always fail;
+> 3. **`cli/watermark.py` and `body_profiles/` of the
+>    see-through-camera repo** (bundled in the Release ZIP; only
+>    needed separately when installing from a clone). When
+>    troubleshooting, start with `debug.txt` and `cli.log` in the
+>    plugin's `output/` folder.
+
 Prerequisites: a local clone of [see-through-camera](https://github.com/AaronyfDesign/see-through-camera) (a sibling directory is auto-detected) and Python 3 with Pillow (`python3 -m pip install Pillow`).
 
 1. Run:
@@ -88,8 +101,14 @@ Prerequisites: a local clone of [see-through-camera](https://github.com/AaronyfD
 
 ### Windows
 
-Same prerequisites; use the PowerShell installer instead of
-`install.sh`:
+**方式 A（推荐）：下载 Release ZIP，双击安装。** 到
+[Releases](https://github.com/AaronyfDesign/see-through-camera-lr/releases)
+下载 `SeeThroughCamera-windows.zip`，解压后双击 **install.cmd**。
+ZIP 内已内置插件、CLI 和全部机型 profile，无需克隆任何仓库。也可以
+把 `SeeThroughCamera.lrplugin` 文件夹直接拖到 install.cmd 图标上，
+效果相同。装完重启 Lightroom Classic。
+
+**方式 B：从仓库安装。** 克隆本仓库与 see-through-camera 仓库后运行：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\install.ps1

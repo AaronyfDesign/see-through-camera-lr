@@ -4,27 +4,50 @@
 # machine-specific Config.lua pointing at your Python and the
 # see-through-camera CLI.
 #
+# Usage:
+#   install.ps1                  install from the repo (src/) or from a
+#                                bundled SeeThroughCamera.lrplugin next
+#                                to this script (Release ZIP layout)
+#   install.ps1 C:\path\SeeThroughCamera.lrplugin
+#                                install the given plugin folder (this
+#                                is what dragging it onto install.cmd
+#                                does)
+#
 # Auto-detection (override with environment variables):
 #   SEE_THROUGH_CAMERA_PYTHON  python interpreter used to run the CLI
 #   SEE_THROUGH_CAMERA_CLI     path to cli\watermark.py of a
 #                              see-through-camera checkout
 #
 # The CLI needs Pillow:  python -m pip install Pillow
+param([string]$PluginPath = '')
 $ErrorActionPreference = 'Stop'
 
 $repoDir = Split-Path -Parent $PSScriptRoot          # see-through-camera-lr
-$src     = Join-Path $repoDir 'src\SeeThroughCamera.lrplugin'
 $modules = Join-Path $env:APPDATA 'Adobe\Lightroom\Modules'
 $dest    = Join-Path $modules 'SeeThroughCamera.lrplugin'
 
+# --- locate the plugin source --------------------------------------------
+# priority: explicit path (drag-drop) > bundled copy (Release ZIP) > repo src
+if ($PluginPath) {
+    if (-not (Test-Path $PluginPath)) {
+        Write-Error "plugin folder not found: $PluginPath"
+    }
+    $src = $PluginPath
+} elseif (Test-Path (Join-Path $PSScriptRoot 'SeeThroughCamera.lrplugin')) {
+    $src = Join-Path $PSScriptRoot 'SeeThroughCamera.lrplugin'
+} else {
+    $src = Join-Path $repoDir 'src\SeeThroughCamera.lrplugin'
+}
 if (-not (Test-Path $modules)) {
     Write-Error "Lightroom Modules folder not found: $modules"
 }
 
-# --- locate the CLI checkout --------------------------------------------
+# --- locate the CLI -------------------------------------------------------
+# priority: env > bundled cli\watermark.py (Release ZIP) > sibling/repo checkout
 $cli = $env:SEE_THROUGH_CAMERA_CLI
 if (-not $cli) {
     foreach ($cand in @(
+        (Join-Path $PSScriptRoot 'cli\watermark.py'),
         (Join-Path (Split-Path -Parent $repoDir) 'see-through-camera\cli\watermark.py'),
         (Join-Path $repoDir 'see-through-camera\cli\watermark.py'))) {
         if (Test-Path $cand) { $cli = $cand; break }
