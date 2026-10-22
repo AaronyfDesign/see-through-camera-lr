@@ -66,13 +66,57 @@ return {
 
     local lastCard = nil
     local failures = {}
+    dbg('about to iterate renditions')
 
+    local idx = 0
     for _, rendition in exportContext:renditions { stopOnError = true } do
-      local okR, pathOrMessage = rendition:renderImage()
-      dbg('render ok=' .. tostring(okR) .. ' src=' .. tostring(pathOrMessage))
-      if not okR then
-        rendition:skipThisRendition()
-        failures[#failures + 1] = tostring(pathOrMessage)
+      idx = idx + 1
+      -- LR 15.4.1 has no rendition:renderImage() in export-provider
+      -- context: renditions arrive already rendered; destinationPath
+      -- (property) is the finished file (verified by strings on the
+      -- bundled LrExportRendition.lua bytecode).
+      local pathOrMessage = rendition.destinationPath
+      dbg('rendition #' .. idx .. ' path=' .. tostring(pathOrMessage))
+
+      -- Runtime introspection: dump every member reachable through the
+      -- object and its metatable chain, so we learn the real API.
+      local function dumpObj(obj, label)
+        local names, seen, cur, depth = {}, {}, obj, 0
+        while cur and depth < 4 do
+          local okT, t = pcall(function() return cur end)
+          if okT and type(t) == 'table' then
+            for k, v in pairs(t) do
+              if not seen[tostring(k)] then
+                seen[tostring(k)] = true
+                names[#names + 1] = tostring(k) .. '(' .. type(v) .. ')'
+              end
+            end
+          end
+          local okM, mt = pcall(getmetatable, cur)
+          cur = (okM and mt and mt.__index) or nil
+          depth = depth + 1
+        end
+        dbg(label .. ' members: ' .. table.concat(names, ', '))
+      end
+      dumpObj(rendition, 'rendition#' .. tostring(idx))
+
+      -- LR 15.4.1: the final file lands on destinationPath asynchronously
+      -- (the disk provider in AgFileExportServiceProvider does the same
+      -- thing), so poll for it to appear instead of calling any render
+      -- method.
+      local inputPath = nil
+      for _ = 1, 120 do
+        if LrFileUtils.exists(pathOrMessage) then
+          inputPath = pathOrMessage
+          break
+        end
+        LrTasks.sleep(0.5)
+      end
+      dbg('chosen input=' .. tostring(inputPath))
+
+      if not inputPath then
+        failures[#failures + 1] = '渲染数据不可用（'
+          .. tostring(idx) .. '）'
       else
         -- rendered temp file carries EXIF -> CLI resolves the body itself
         local photo = rendition.photo
@@ -86,7 +130,7 @@ return {
           'card_%s_%s.jpg', LrDate.currentTime(),
           (stem:gsub('[^%w%-_]', '_'))))
         local cmd = table.concat({
-          '"', CONFIG.python, '" "', CONFIG.cli, '" "', pathOrMessage, '"',
+          '"', CONFIG.python, '" "', CONFIG.cli, '" "', inputPath, '"',
           ' --body auto --bg ', bgMode,
           ' -o "', outPath, '"',
           ' >> "', OUTDIR, '/cli.log" 2>&1',
