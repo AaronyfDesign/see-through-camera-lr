@@ -57,18 +57,28 @@ profile，插件无需改动。
 
 ## 安装
 
-1. 编辑 `src/SeeThroughCamera.lrplugin/Config.lua`，把 `cli` 指向你的
-   see-through-camera 检出（`cli/watermark.py`），`python` 指向你的
-   Python 3 解释器。
-2. 运行：
+前提：本机克隆好 [see-through-camera](https://github.com/AaronyfDesign/see-through-camera) 仓库（与本仓库同级目录可被自动发现），Python 3 装好 Pillow（`python3 -m pip install Pillow`）。
+
+1. 运行：
 
    ```sh
    scripts/install.sh
    ```
 
-   脚本会把插件复制到 `~/Library/Application Support/Adobe/Lightroom/
-   Modules/` 并注册插件路径偏好，然后重启 Lightroom Classic。
-3. 在 Lightroom 里选中一张照片 → **文件 → 增效工具额外信息 →
+   脚本会自动探测 python3 与 see-through-camera 检出路径，生成机器
+   专属的 `Config.lua`，把插件复制到 `~/Library/Application
+   Support/Adobe/Lightroom/Modules/` 并注册插件路径偏好，然后重启
+   Lightroom Classic 即可。
+
+   路径不在默认位置时用环境变量指定：
+
+   ```sh
+   SEE_THROUGH_CAMERA_CLI=/path/to/see-through-camera/cli/watermark.py \
+   SEE_THROUGH_CAMERA_PYTHON=/path/to/python3 \
+   scripts/install.sh
+   ```
+
+2. 在 Lightroom 里选中一张照片 → **文件 → 增效工具额外信息 →
    See-Through: 生成回屏卡片（…）**，完成后卡片在 Finder 中打开。
 
 ## 卸载
@@ -87,7 +97,7 @@ scripts/uninstall.sh
 ```
 src/SeeThroughCamera.lrplugin/
   Info.lua                   插件清单（声明式菜单项 + 导出服务）
-  Config.lua                 本机路径（python / cli）——安装前先改
+  Config.lua                 本机路径（python / cli）——install.sh 生成
   SeeThroughCard.lua         共享实现（三个菜单项共用）
   ExportServiceProvider.lua  自定义导出目标「机型预览卡片」
   card_{soft,radial,solid}.lua  薄入口

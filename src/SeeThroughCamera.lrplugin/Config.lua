@@ -1,9 +1,11 @@
--- Config.lua — local paths, edit to match your machine.
+-- Config.lua — TEMPLATE. You normally never edit this file: install.sh
+-- regenerates it (in the installed copy) with paths detected on your
+-- machine. Edit it manually only if you installed the plugin by hand.
 --
--- cli: the see-through-camera renderer (cli/watermark.py of the
---   see-through-camera repo). Body profiles are resolved by that repo's
---   body_profiles/ directory, so the CLI must point at a real checkout.
+-- python: interpreter that runs the CLI; needs Pillow (PIL).
+-- cli:    cli/watermark.py of a see-through-camera checkout — body
+--         profiles are resolved from that repo's body_profiles/ dir.
 return {
-  python = '/Users/zhangyf/.catdesk/runtimes/python/versions/3.12.13/bin/python3.12',
-  cli = '/Users/zhangyf/work/personal/see-through-camera/cli/watermark.py',
+  python = '/path/to/python3',
+  cli = '/path/to/see-through-camera/cli/watermark.py',
 }
