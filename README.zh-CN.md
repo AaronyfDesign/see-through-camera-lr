@@ -112,9 +112,21 @@ scripts/uninstall.sh  两处一并移除
   `body_profiles/*/profile.json` `aliases` 里匹配到。
 - 菜单项用 `Info.lua` 的 `LrLibraryMenuItems` 声明；`LrInitPlugin` 方式
   注册菜单不可靠。
-- `LrDialogs` 没有 `showInFinder`（曾导致每次成功渲染后仍弹错，见
-  issue #1），正确 API 是 `LrShell.revealInShell(path)`。
+- LR 15.4.1 的导出提供者上下文里 `rendition:renderImage()` 已被移除
+  （`getJPEGData`/`export`/`renderFinalImage` 同样不存在），运行时报
+  "attempt to call method (a nil value)"，且错误弹窗常被其他窗口遮挡，
+  表面上像「导出卡死」。内置硬盘导出器
+  （`AgFileExportServiceProvider.lua`，随 LR 附带）也只用
+  `renditions` + `rendition.destinationPath`。
+- 处理期间 `destinationPath` 指向的文件尚未落盘——LR 在
+  `processRenderedPhotos` 返回前后才异步写出。提供者需要文件内容时
+  （如本插件调 CLI 生成卡片）必须轮询
+  `LrFileUtils.exists(destinationPath)` 等它出现（本插件上限 60s）。
+- LrView 工厂没有 `popup_field`，下拉控件名是 `popup_menu`；`bind`
+  来自 `LrView`（`LrView.bind{table=...,key=...}`），不是全局函数。
+- `LrShell.revealInShell(path)` 在 Finder 中显示文件；
+  `LrDialogs.showInFinder` 不存在。
 - 导出目标路径只在内部键下生效（`export_destinationType =
   'specificFolder'` + `export_destinationPathPrefix`），UI 预设的
-  `LR_export_*` 键会被会话忽略。`rendition:renderImage()` 仅存在于
-  导出服务上下文；菜单项路径必须走 `doExportOnCurrentTask()`。
+  `LR_export_*` 键会被会话忽略。菜单项路径必须走
+  `doExportOnCurrentTask()`。
