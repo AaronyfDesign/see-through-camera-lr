@@ -13,6 +13,7 @@ local LrFileUtils = import 'LrFileUtils'
 local LrPathUtils = import 'LrPathUtils'
 local LrShell = import 'LrShell'
 local LrTasks = import 'LrTasks'
+local LrView = import 'LrView'
 local LrDate = import 'LrDate'
 
 local CONFIG = require 'Config'
@@ -43,8 +44,8 @@ return {
             alignment = 'right',
             width = 80,
           },
-          f:popup_field {
-            value = bind { table = propertyTable, key = 'bgMode' },
+          f:popup_menu {
+            value = LrView.bind { table = propertyTable, key = 'bgMode' },
             items = {
               { value = 'soft',   title = '柔和虚化' },
               { value = 'radial', title = '径向模糊' },
