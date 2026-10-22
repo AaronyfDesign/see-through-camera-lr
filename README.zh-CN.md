@@ -21,6 +21,34 @@
 - 三种背景模式对应 **文件 → 增效工具额外信息** 下的三个菜单项：
   柔和虚化 / 径向模糊 / 纯色填充。
 
+## 导出联动
+
+除了快捷菜单，也可以走 Lightroom 的标准导出流程：**文件 → 导出…**，在
+「导出位置」下拉里选 **「机型预览卡片（See-Through）」**，面板中可选
+背景模式。导出时每张渲染好的照片会自动生成一张卡片，结果集中在插件
+目录的 `output/` 下并在完成后自动弹出 Finder。
+
+## 支持机型
+
+与 [see-through-camera](https://github.com/AaronyfDesign/see-through-camera)
+的 `body_profiles/` 保持同步（以下为 EXIF 机型名与对应 profile）：
+
+| 机身 | profile |
+| --- | --- |
+| Nikon Z 6III（NIKON Z6_3） | `z63` |
+| Nikon ZR | `zr` |
+| Nikon Z 5II / Z 5II C | `z52` / `z5iic` |
+| Nikon Z 6 / Z 6II | `z6` / `z62` |
+| Nikon Z 7 / Z 7II | `z7` / `z72` |
+| Nikon Z 8 / Z 9 | `z8` / `z9` |
+| Nikon Z f / Z fc | `zf` / `zfc` |
+| Nikon Z 5 / Z 30 / Z 50II | `z5` / `z30` / `z502` |
+| Nikon D850 | `d850` |
+| 乐高相机（彩蛋） | `lego` |
+
+未列出的机型会回落到 `lego` 机身。新增机型只需在 CLI 仓库添加
+profile，插件无需改动。
+
 ## 环境要求
 
 - Lightroom Classic（在 15.4.1 / macOS arm64 上开发验证）
@@ -58,9 +86,10 @@ scripts/uninstall.sh
 
 ```
 src/SeeThroughCamera.lrplugin/
-  Info.lua            插件清单（声明式菜单项）
-  Config.lua          本机路径（python / cli）——安装前先改
-  SeeThroughCard.lua  共享实现（三个菜单项共用）
+  Info.lua                   插件清单（声明式菜单项 + 导出服务）
+  Config.lua                 本机路径（python / cli）——安装前先改
+  SeeThroughCard.lua         共享实现（三个菜单项共用）
+  ExportServiceProvider.lua  自定义导出目标「机型预览卡片」
   card_{soft,radial,solid}.lua  薄入口
 scripts/install.sh    复制到 LR Modules + 修正插件路径偏好
 scripts/uninstall.sh  两处一并移除
@@ -83,3 +112,9 @@ scripts/uninstall.sh  两处一并移除
   `body_profiles/*/profile.json` `aliases` 里匹配到。
 - 菜单项用 `Info.lua` 的 `LrLibraryMenuItems` 声明；`LrInitPlugin` 方式
   注册菜单不可靠。
+- `LrDialogs` 没有 `showInFinder`（曾导致每次成功渲染后仍弹错，见
+  issue #1），正确 API 是 `LrShell.revealInShell(path)`。
+- 导出目标路径只在内部键下生效（`export_destinationType =
+  'specificFolder'` + `export_destinationPathPrefix`），UI 预设的
+  `LR_export_*` 键会被会话忽略。`rendition:renderImage()` 仅存在于
+  导出服务上下文；菜单项路径必须走 `doExportOnCurrentTask()`。

@@ -22,5 +22,10 @@ return {
     { title = "See-Through: 生成回屏卡片（纯色填充）", file = "card_solid.lua" },
   },
 
+  LrExportServiceProvider = {
+    title = "机型预览卡片（See-Through）",
+    file = "ExportServiceProvider.lua",
+  },
+
   -- (no LrInitPlugin: menu files are declarative and load on click)
 }
