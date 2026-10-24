@@ -51,21 +51,29 @@ profile，插件无需改动。
 
 ## 环境要求
 
-- Lightroom Classic（在 15.4.1 上开发验证；macOS arm64 与 Windows 均支持）
-- Python 3 及 Pillow（CLI 的依赖）
-- 本地有 [see-through-camera](https://github.com/AaronyfDesign/see-through-camera) 仓库
+- Lightroom Classic（在 15.4.1 上开发验证；macOS arm64/x86_64 与 Windows x64 均支持）
+- 无需 Python：Release ZIP 内置了自包含的原生渲染器（`cardgen`）。
+  仅回退路径（从克隆安装且无法编译）需要 Python 3 + Pillow。
 
 ## 安装
 
-> **依赖（必读）：插件本体只是个调度器，真正渲染卡片的是外部
-> Python CLI。无论哪种安装方式，都必须满足：**
-> 1. **Python 3**（3.9+），在 PATH 上或用环境变量显式指定；
-> 2. **Pillow**：`python -m pip install Pillow`——缺了它出卡必然失败；
-> 3. **see-through-camera 仓库的 `cli/watermark.py` 与 `body_profiles/`**
->    （从 Release ZIP 下载时已内置，克隆安装时才需要另外准备）。
->    排障时先看插件 `output/` 下的 `debug.txt` 与 `cli.log`。
+> **Release ZIP 路径零依赖：压缩包内自带插件、原生渲染器二进制、
+> 内嵌字体和全部机型 profile，下载、解压、运行安装器即完成。**
+> Python 回退路径（仅克隆安装）仍需 Python 3 + Pillow
+> （`python -m pip install Pillow`）与 see-through-camera 仓库。
+> 排障时先看插件 `output/` 下的 `debug.txt` 与 `cli.log`。
 
-前提：本机克隆好 [see-through-camera](https://github.com/AaronyfDesign/see-through-camera) 仓库（与本仓库同级目录可被自动发现），Python 3 装好 Pillow（`python3 -m pip install Pillow`）。
+### macOS
+
+**方式 A（推荐）：下载 Release ZIP。** 到
+[Releases](https://github.com/AaronyfDesign/see-through-camera-lr/releases)
+下载 `SeeThroughCamera-macos.zip`，解压后在终端运行 `sh install.sh`。
+ZIP 内已内置插件、原生 `cardgen` 二进制和全部机型 profile，无需
+Python、无需克隆仓库。安装器会自动清除 macOS 给内置二进制打的
+隔离标记（quarantine）。
+
+**方式 B：从仓库安装。** 克隆本仓库与 see-through-camera 仓库
+（同级目录可被自动发现）后运行：
 
 1. 运行：
 
@@ -73,14 +81,16 @@ profile，插件无需改动。
    scripts/install.sh
    ```
 
-   脚本会自动探测 python3 与 see-through-camera 检出路径，生成机器
-   专属的 `Config.lua`，把插件复制到 `~/Library/Application
-   Support/Adobe/Lightroom/Modules/` 并注册插件路径偏好，然后重启
-   Lightroom Classic 即可。
+   脚本优先使用原生渲染器（没有预编译二进制时会从
+   see-through-camera 检出现场编译 `cardgen`），把二进制、字体和
+   机型 profile 一并复制进已安装的插件目录，并生成机器专属的
+   `Config.lua`。没有编译器时回退到 Python CLI（自动探测
+   `python3` + `watermark.py`）。
 
    路径不在默认位置时用环境变量指定：
 
    ```sh
+   SEE_THROUGH_CAMERA_CARDGEN=/path/to/cardgen \
    SEE_THROUGH_CAMERA_CLI=/path/to/see-through-camera/cli/watermark.py \
    SEE_THROUGH_CAMERA_PYTHON=/path/to/python3 \
    scripts/install.sh
@@ -94,11 +104,13 @@ profile，插件无需改动。
 **方式 A（推荐）：下载 Release ZIP，双击安装。** 到
 [Releases](https://github.com/AaronyfDesign/see-through-camera-lr/releases)
 下载 `SeeThroughCamera-windows.zip`，解压后双击 **install.cmd**。
-ZIP 内已内置插件、CLI 和全部机型 profile，无需克隆任何仓库。也可以
+ZIP 内已内置插件、原生 `cardgen.exe` 渲染器和全部机型 profile，
+无需 Python、无需克隆任何仓库。也可以
 把 `SeeThroughCamera.lrplugin` 文件夹直接拖到 install.cmd 图标上，
 效果相同。装完重启 Lightroom Classic。
 
-**方式 B：从仓库安装。** 克隆本仓库与 see-through-camera 仓库后运行：
+**方式 B：从仓库安装（Python 回退路径）。** 克隆本仓库与
+see-through-camera 仓库后运行：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\install.ps1

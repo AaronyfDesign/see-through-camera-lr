@@ -57,26 +57,33 @@ a new profile in the CLI repo — no plugin change needed.
 
 ## Requirements
 
-- Lightroom Classic (developed and verified on 15.4.1; macOS arm64 and Windows both supported)
-- Python 3 with Pillow (the CLI's dependency)
-- A local checkout of [see-through-camera](https://github.com/AaronyfDesign/see-through-camera)
+- Lightroom Classic (developed and verified on 15.4.1; macOS arm64/x86_64 and Windows x64 supported)
+- No Python needed: the Release ZIP bundles a self-contained native
+  renderer (`cardgen`). Python 3 + Pillow is only required for the
+  fallback path (installing from a clone without a C compiler build).
 
 ## Install
 
-> **Dependencies (read this first): the plugin is only a dispatcher —
-> the card is actually rendered by an external Python CLI. Every
-> install method requires:**
-> 1. **Python 3** (3.9+) on PATH, or set explicitly via environment
->    variable;
-> 2. **Pillow**: `python -m pip install Pillow` — without it card
->    generation will always fail;
-> 3. **`cli/watermark.py` and `body_profiles/` of the
->    see-through-camera repo** (bundled in the Release ZIP; only
->    needed separately when installing from a clone). When
->    troubleshooting, start with `debug.txt` and `cli.log` in the
->    plugin's `output/` folder.
+> **No dependencies for the Release ZIP path: the bundle ships the
+> plugin plus a native renderer binary, the bundled fonts and every
+> body profile. Download, unzip, run the installer - done.**
+> The Python fallback (only for clone installs) still needs Python 3
+> with Pillow (`python -m pip install Pillow`) and the
+> see-through-camera repo. When troubleshooting, start with `debug.txt`
+> and `cli.log` in the plugin's `output/` folder.
 
-Prerequisites: a local clone of [see-through-camera](https://github.com/AaronyfDesign/see-through-camera) (a sibling directory is auto-detected) and Python 3 with Pillow (`python3 -m pip install Pillow`).
+### macOS
+
+**Option A (recommended): download the Release ZIP.** Grab
+`SeeThroughCamera-macos.zip` from the
+[Releases](https://github.com/AaronyfDesign/see-through-camera-lr/releases)
+page, unzip, and run `install.sh` (Terminal: `sh install.sh`). The ZIP
+bundles the plugin, the native `cardgen` binary and every body profile -
+no Python, no repo cloning. The installer clears the macOS quarantine
+flag on the bundled binary automatically.
+
+**Option B: install from a clone.** Clone this repo and the
+see-through-camera repo (sibling directory is auto-detected), then run:
 
 1. Run:
 
@@ -84,15 +91,17 @@ Prerequisites: a local clone of [see-through-camera](https://github.com/AaronyfD
    scripts/install.sh
    ```
 
-   The script detects your python3 and the see-through-camera checkout,
-   generates a machine-specific `Config.lua`, copies the plugin into
-   `~/Library/Application Support/Adobe/Lightroom/Modules/`, registers it
-   in Lightroom's plugin-path preference — then restart Lightroom
-   Classic.
+   The script prefers a native renderer (it builds `cardgen` from the
+   see-through-camera checkout if no prebuilt binary is found), copies
+   the binary, fonts and body profiles into the installed plugin folder,
+   and generates a machine-specific `Config.lua`. If no compiler is
+   available it falls back to the Python CLI (auto-detected `python3` +
+   `watermark.py`).
 
    If your paths differ, override via environment variables:
 
    ```sh
+   SEE_THROUGH_CAMERA_CARDGEN=/path/to/cardgen \
    SEE_THROUGH_CAMERA_CLI=/path/to/see-through-camera/cli/watermark.py \
    SEE_THROUGH_CAMERA_PYTHON=/path/to/python3 \
    scripts/install.sh
@@ -108,13 +117,14 @@ Prerequisites: a local clone of [see-through-camera](https://github.com/AaronyfD
 Grab `SeeThroughCamera-windows.zip` from the
 [Releases](https://github.com/AaronyfDesign/see-through-camera-lr/releases)
 page, unzip, and double-click **install.cmd**. The ZIP bundles the
-plugin, the CLI and every body profile — no repo cloning needed. You
+plugin, the native `cardgen.exe` renderer and every body profile —
+no Python, no repo cloning needed. You
 can also drag the `SeeThroughCamera.lrplugin` folder onto the
 install.cmd icon; both work the same. Restart Lightroom Classic when
 done.
 
-**Option B: install from a clone.** Clone this repo and the
-see-through-camera repo, then run:
+**Option B: install from a clone (Python fallback).** Clone this repo
+and the see-through-camera repo, then run:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\install.ps1
@@ -123,7 +133,7 @@ powershell -ExecutionPolicy Bypass -File scripts\install.ps1
 It copies the plugin into `%APPDATA%\Adobe\Lightroom\Modules\`
 (Lightroom auto-loads plugins from there — no preference registration
 needed) and generates `Config.lua` with your paths. Overrides are the
-same two environment variables. Uninstall on Windows: delete the plugin
+same environment variables (`SEE_THROUGH_CAMERA_CARDGEN`, `_CLI`, `_PYTHON`). Uninstall on Windows: delete the plugin
 folder from `Modules`.
 
 ## Uninstall

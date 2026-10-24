@@ -17,6 +17,7 @@ local LrView = import 'LrView'
 local LrDate = import 'LrDate'
 
 local CONFIG = require 'Config'
+local RENDER = require 'Renderer'
 
 local OUTDIR = LrPathUtils.child(_PLUGIN.path, 'output')
 
@@ -129,13 +130,8 @@ return {
         local outPath = LrPathUtils.child(OUTDIR, string.format(
           'card_%s_%s.jpg', LrDate.currentTime(),
           (stem:gsub('[^%w%-_]', '_'))))
-        local cmd = table.concat({
-          '"', CONFIG.python, '" "', CONFIG.cli, '" "', inputPath, '"',
-          ' --body auto --bg ', bgMode,
-          ' -o "', outPath, '"',
-          ' >> "', OUTDIR, '/cli.log" 2>&1',
-        })
-        dbg('exec: ' .. cmd)
+        local cmd, which = RENDER.renderCommand(inputPath, outPath, bgMode)
+        dbg('exec [' .. which .. ']: ' .. cmd)
         local status = LrTasks.execute(cmd)
         dbg('execute status=' .. tostring(status))
         if status == 0 then

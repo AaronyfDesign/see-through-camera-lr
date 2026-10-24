@@ -1,8 +1,9 @@
-name: windows-zip
+name: bundles
 
-# Build the self-contained Windows bundle: plugin + CLI + body profiles
-# + double-click/drag-drop installer, as a Release asset. Every push to
-# main updates the workflow artifact; a v* tag attaches it to a release.
+# Build self-contained per-platform bundles: plugin + native cardgen
+# renderer (no Python needed) + body profiles + installer, as Release
+# assets. Every push to main updates the workflow artifacts; a v* tag
+# attaches them to a release.
 
 on:
   push:
@@ -14,23 +15,34 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  windows:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Checkout CLI repo (profiles + renderer)
+      - name: Checkout CLI repo (profiles + renderer source)
         uses: actions/checkout@v4
         with:
           repository: AaronyfDesign/see-through-camera
           path: see-through-camera
 
+      - name: Install mingw-w64
+        run: sudo apt-get update && sudo apt-get install -y gcc-mingw-w64-x86-64
+
+      - name: Build cardgen.exe
+        run: |
+          mkdir -p dist/SeeThroughCamera-windows/bin
+          gcc -O2 -std=c11 -D_DEFAULT_SOURCE -static \
+            -o dist/SeeThroughCamera-windows/bin/cardgen.exe \
+            see-through-camera/cli/native/cardgen.c -lm
+          file dist/SeeThroughCamera-windows/bin/cardgen.exe
+
       - name: Stage bundle
         run: |
-          mkdir -p dist/SeeThroughCamera-windows/cli
-          cp -R src/SeeThroughCamera.lrplugin dist/SeeThroughCamera-windows/
-          cp see-through-camera/cli/watermark.py dist/SeeThroughCamera-windows/cli/
+          mkdir -p dist/SeeThroughCamera-windows/fonts
+          cp see-through-camera/cli/native/fonts/*.ttf dist/SeeThroughCamera-windows/fonts/
           cp -R see-through-camera/body_profiles dist/SeeThroughCamera-windows/
+          cp -R src/SeeThroughCamera.lrplugin dist/SeeThroughCamera-windows/
           cp scripts/install.ps1 scripts/install.cmd dist/SeeThroughCamera-windows/
           cp README.zh-CN.md dist/SeeThroughCamera-windows/使用说明.md
           cd dist && zip -r ../SeeThroughCamera-windows.zip SeeThroughCamera-windows
@@ -46,3 +58,47 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: SeeThroughCamera-windows.zip
+
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout CLI repo (profiles + renderer source)
+        uses: actions/checkout@v4
+        with:
+          repository: AaronyfDesign/see-through-camera
+          path: see-through-camera
+
+      - name: Build cardgen (arm64 + x86_64)
+        run: |
+          mkdir -p dist/SeeThroughCamera-macos/bin
+          cd see-through-camera/cli/native
+          cc -O2 -std=c11 -D_DEFAULT_SOURCE -arch arm64 -o /tmp/cardgen-arm64 cardgen.c -lm
+          cc -O2 -std=c11 -D_DEFAULT_SOURCE -arch x86_64 -o /tmp/cardgen-x64 cardgen.c -lm
+          lipo -create /tmp/cardgen-arm64 /tmp/cardgen-x64 -output \
+            "$GITHUB_WORKSPACE/dist/SeeThroughCamera-macos/bin/cardgen"
+          file "$GITHUB_WORKSPACE/dist/SeeThroughCamera-macos/bin/cardgen"
+
+      - name: Stage bundle
+        run: |
+          mkdir -p dist/SeeThroughCamera-macos/fonts
+          cp see-through-camera/cli/native/fonts/*.ttf dist/SeeThroughCamera-macos/fonts/
+          cp -R see-through-camera/body_profiles dist/SeeThroughCamera-macos/
+          cp -R src/SeeThroughCamera.lrplugin dist/SeeThroughCamera-macos/
+          cp scripts/install.sh dist/SeeThroughCamera-macos/
+          chmod +x dist/SeeThroughCamera-macos/install.sh
+          cp README.zh-CN.md dist/SeeThroughCamera-macos/使用说明.md
+          cd dist && zip -r ../SeeThroughCamera-macos.zip SeeThroughCamera-macos
+
+      - name: Upload artifact (every run)
+        uses: actions/upload-artifact@v4
+        with:
+          name: SeeThroughCamera-macos
+          path: SeeThroughCamera-macos.zip
+
+      - name: Attach to release (v* tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: SeeThroughCamera-macos.zip

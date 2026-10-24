@@ -20,6 +20,7 @@ local LrTasks = import 'LrTasks'
 local LrDate = import 'LrDate'
 
 local CONFIG = require 'Config'
+local RENDER = require 'Renderer'
 
 local OUTDIR = LrPathUtils.child(_PLUGIN.path, 'output')
 
@@ -103,17 +104,12 @@ local function makeCard(bgMode)
       return
     end
 
-    -- 2. external renderer
+    -- 2. external renderer (native cardgen if installed, else Python CLI)
     progress:setCaption('渲染回屏卡片…')
     local outPath = LrPathUtils.child(OUTDIR,
       'card_' .. LrDate.currentTime() .. '.jpg')
-    local cmd = table.concat({
-      '"', CONFIG.python, '" "', CONFIG.cli, '" "', srcPath, '"',
-      ' --body auto --bg ', bgMode,
-      ' -o "', outPath, '"',
-      ' >> "', OUTDIR, '/cli.log" 2>&1',
-    })
-    dbg('exec: ' .. cmd)
+    local cmd, which = RENDER.renderCommand(srcPath, outPath, bgMode)
+    dbg('exec [' .. which .. ']: ' .. cmd)
     local status = LrTasks.execute(cmd)
     dbg('execute status=' .. tostring(status))
     progress:done()
