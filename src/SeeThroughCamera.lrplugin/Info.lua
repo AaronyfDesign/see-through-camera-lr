@@ -6,9 +6,8 @@ return {
   LrPluginName = "See-Through Camera",
   LrToolkitIdentifier = "com.aaronyf.seethrough",
   LrPluginInfoUrl = "https://github.com/AaronyfDesign/see-through-camera-lr",
-  LrPluginInfoProvider = "aaronyf",
 
-  VERSION = { major = 0, minor = 3, revision = 0, build = 1 },
+  VERSION = { major = 0, minor = 3, revision = 1, build = 1 },
 
   LrLibraryMenuItems = {
     { title = "See-Through: 生成回屏卡片（柔和虚化）", file = "card_soft.lua" },
