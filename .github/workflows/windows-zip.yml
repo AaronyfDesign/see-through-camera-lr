@@ -32,10 +32,12 @@ jobs:
       - name: Build cardgen.exe
         run: |
           mkdir -p dist/SeeThroughCamera-windows/bin
-          gcc -O2 -std=c11 -D_DEFAULT_SOURCE -static \
+          x86_64-w64-mingw32-gcc -O2 -std=c11 -D_DEFAULT_SOURCE -static \
             -o dist/SeeThroughCamera-windows/bin/cardgen.exe \
             see-through-camera/cli/native/cardgen.c -lm
           file dist/SeeThroughCamera-windows/bin/cardgen.exe
+          # guard: must be a Windows PE, not a host ELF
+          file dist/SeeThroughCamera-windows/bin/cardgen.exe | grep -q 'PE32+'
 
       - name: Stage bundle
         run: |
