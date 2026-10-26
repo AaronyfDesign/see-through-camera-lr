@@ -15,6 +15,11 @@ local function quote(s)
   return '"' .. s .. '"'
 end
 
+local function forExecution(cmd)
+  -- On Windows, cmd /c removes the first and last quotes of a quoted command.
+  return OUTDIR:find('\\', 1, true) and quote(cmd) or cmd
+end
+
 --- Build the shell command that renders `srcPath` into `outPath`.
 --- Returns command string, renderer name (for logs).
 local function renderCommand(srcPath, outPath, bgMode)
@@ -30,7 +35,7 @@ local function renderCommand(srcPath, outPath, bgMode)
       '-o', quote(outPath),
       '>>', log,
     }, ' ')
-    return cmd, 'cardgen'
+    return forExecution(cmd), 'cardgen'
   end
 
   local cmd = table.concat({
@@ -39,7 +44,7 @@ local function renderCommand(srcPath, outPath, bgMode)
     '-o', quote(outPath),
     '>>', log,
   }, ' ')
-  return cmd, 'python-cli'
+  return forExecution(cmd), 'python-cli'
 end
 
 return {

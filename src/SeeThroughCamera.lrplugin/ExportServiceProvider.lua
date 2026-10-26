@@ -101,17 +101,16 @@ return {
       end
       dumpObj(rendition, 'rendition#' .. tostring(idx))
 
-      -- LR 15.4.1: the final file lands on destinationPath asynchronously
-      -- (the disk provider in AgFileExportServiceProvider does the same
-      -- thing), so poll for it to appear instead of calling any render
-      -- method.
+      -- destinationPath can be set before rendering finishes. Copy the
+      -- completed JPEG before metadata calls yield to other Lightroom tasks.
       local inputPath = nil
-      for _ = 1, 120 do
-        if LrFileUtils.exists(pathOrMessage) then
-          inputPath = pathOrMessage
-          break
+      local rendered, renderPath = rendition:waitForRender()
+      if rendered then
+        local snapshotPath = LrPathUtils.child(OUTDIR, string.format(
+          'rendition_%s_%d.jpg', LrDate.currentTime(), idx))
+        if LrFileUtils.copy(renderPath or pathOrMessage, snapshotPath) then
+          inputPath = snapshotPath
         end
-        LrTasks.sleep(0.5)
       end
       dbg('chosen input=' .. tostring(inputPath))
 
@@ -134,6 +133,7 @@ return {
         dbg('exec [' .. which .. ']: ' .. cmd)
         local status = LrTasks.execute(cmd)
         dbg('execute status=' .. tostring(status))
+        LrFileUtils.delete(inputPath)
         if status == 0 then
           lastCard = outPath
         else
