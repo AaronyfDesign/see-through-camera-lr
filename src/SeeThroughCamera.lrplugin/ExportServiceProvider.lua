@@ -70,6 +70,7 @@ return {
     dbg('about to iterate renditions')
 
     local idx = 0
+    local nonJpegCount = 0
     for _, rendition in exportContext:renditions { stopOnError = true } do
       idx = idx + 1
       -- LR 15.4.1 has no rendition:renderImage() in export-provider
@@ -105,18 +106,32 @@ return {
       -- completed JPEG before metadata calls yield to other Lightroom tasks.
       local inputPath = nil
       local rendered, renderPath = rendition:waitForRender()
+      local sourcePath = renderPath or pathOrMessage
+      -- JPEG-only guard: cardgen's EXIF parser reads JPEG APP1 only. A TIFF
+      -- or PSD rendition reaches the CLI and dies with a cryptic "EXIF Model
+      -- missing"; catch it here with an actionable message instead.
+      local ext = sourcePath and string.lower(LrPathUtils.extension(sourcePath)) or ''
+      local skipped = false
+      if rendered and ext ~= 'jpg' and ext ~= 'jpeg' then
+        nonJpegCount = nonJpegCount + 1
+        dbg('non-jpeg rendition, skipped: ' .. tostring(sourcePath))
+        rendered = false
+        skipped = true
+      end
       if rendered then
         local snapshotPath = LrPathUtils.child(OUTDIR, string.format(
           'rendition_%s_%d.jpg', LrDate.currentTime(), idx))
-        if LrFileUtils.copy(renderPath or pathOrMessage, snapshotPath) then
+        if LrFileUtils.copy(sourcePath, snapshotPath) then
           inputPath = snapshotPath
         end
       end
       dbg('chosen input=' .. tostring(inputPath))
 
       if not inputPath then
-        failures[#failures + 1] = '渲染数据不可用（'
-          .. tostring(idx) .. '）'
+        if not skipped then
+          failures[#failures + 1] = '渲染数据不可用（'
+            .. tostring(idx) .. '）'
+        end
       else
         -- rendered temp file carries EXIF -> CLI resolves the body itself
         local photo = rendition.photo
@@ -140,6 +155,11 @@ return {
           failures[#failures + 1] = stem .. '（CLI 渲染失败，见 output/cli.log）'
         end
       end
+    end
+
+    if nonJpegCount > 0 then
+      table.insert(failures, 1, nonJpegCount .. ' 个文件已跳过：导出格式需为 JPEG，'
+        .. '请在导出对话框把格式设为「JPEG」后重新运行')
     end
 
     if #failures > 0 then
