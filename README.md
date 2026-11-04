@@ -56,6 +56,8 @@ Kept in sync with `body_profiles/` of
 | Sony ZV-E10 | `zve10` |
 | Canon EOS 5D Mark IV | `canon5d4` |
 | Canon EOS R5 Mark II | `canonr5ii` |
+| Hasselblad X2D 100C | `x2d` |
+| Hasselblad X2D II 100C | `x2d2` |
 | LEGO camera (easter egg) | `lego` |
 
 Unknown models fall back to the `lego` body. Adding a body only requires
