@@ -22,11 +22,12 @@ end
 
 --- Build the shell command that renders `srcPath` into `outPath`.
 --- Returns command string, renderer name (for logs).
-local function renderCommand(srcPath, outPath, bgMode)
+local function renderCommand(srcPath, outPath, bgMode, bodyScale)
   local log = quote(LrPathUtils.child(OUTDIR, 'cli.log')) .. ' 2>&1'
 
   local binary = CONFIG.binary
   if binary and binary ~= '' and LrFileUtils.exists(binary) then
+    local scale = tonumber(bodyScale) or 1.0
     local cmd = table.concat({
       quote(binary), quote(srcPath),
       '--body auto', '--bg ' .. bgMode,
@@ -35,6 +36,9 @@ local function renderCommand(srcPath, outPath, bgMode)
       '-o', quote(outPath),
       '>>', log,
     }, ' ')
+    if scale > 1.001 then
+      cmd = cmd .. ' --body-scale ' .. string.format('%.2f', scale)
+    end
     return forExecution(cmd), 'cardgen'
   end
 

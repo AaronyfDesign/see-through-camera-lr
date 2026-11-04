@@ -32,6 +32,7 @@ end
 return {
   exportPresetFields = {
     { key = 'bgMode', default = 'soft' },
+    { key = 'bodyScale', default = 1.0 },
   },
 
   sectionsForTopOfDialog = function(f, propertyTable)
@@ -55,6 +56,31 @@ return {
             width = 120,
           },
         },
+        f:row {
+          spacing = f:control_spacing(),
+          f:static_text {
+            title = '机身缩放',
+            alignment = 'right',
+            width = 80,
+          },
+          f:slider {
+            value = LrView.bind { table = propertyTable, key = 'bodyScale' },
+            min = 1,
+            max = 1.28,
+            integral = false,
+            width = 160,
+          },
+          f:static_text {
+            title = LrView.bind {
+              table = propertyTable,
+              key = 'bodyScale',
+              transform = function(v)
+                return string.format('%.2f×', tonumber(v) or 1)
+              end,
+            },
+            width = 52,
+          },
+        },
       },
     }
   end,
@@ -63,7 +89,8 @@ return {
     LrFileUtils.createAllDirectories(OUTDIR)
     local propertyTable = exportContext.propertyTable
     local bgMode = propertyTable.bgMode or 'soft'
-    dbg('=== export started, bgMode=' .. bgMode)
+    local bodyScale = tonumber(propertyTable.bodyScale) or 1.0
+    dbg('=== export started, bgMode=' .. bgMode .. ', bodyScale=' .. string.format('%.2f', bodyScale))
 
     local lastCard = nil
     local failures = {}
@@ -144,7 +171,7 @@ return {
         local outPath = LrPathUtils.child(OUTDIR, string.format(
           'card_%s_%s.jpg', LrDate.currentTime(),
           (stem:gsub('[^%w%-_]', '_'))))
-        local cmd, which = RENDER.renderCommand(inputPath, outPath, bgMode)
+        local cmd, which = RENDER.renderCommand(inputPath, outPath, bgMode, bodyScale)
         dbg('exec [' .. which .. ']: ' .. cmd)
         local status = LrTasks.execute(cmd)
         dbg('execute status=' .. tostring(status))
