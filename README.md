@@ -50,6 +50,12 @@ Kept in sync with `body_profiles/` of
 | Nikon Z f / Z fc | `zf` / `zfc` |
 | Nikon Z 5 / Z 30 / Z 50II | `z5` / `z30` / `z502` |
 | Nikon D850 | `d850` |
+| Sony α6400 (SONY ILCE-6400) | `a6400` |
+| Sony α6700 (SONY ILCE-6700) | `a6700` |
+| Sony α1 II (SONY ILCE-1M2) | `a1m2` |
+| Sony ZV-E10 | `zve10` |
+| Canon EOS 5D Mark IV | `canon5d4` |
+| Canon EOS R5 Mark II | `canonr5ii` |
 | LEGO camera (easter egg) | `lego` |
 
 Unknown models fall back to the `lego` body. Adding a body only requires
