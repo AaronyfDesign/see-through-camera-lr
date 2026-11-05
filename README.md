@@ -21,17 +21,43 @@ menu click → selected photo → full-resolution JPEG export (keeps EXIF)
   auto` matches `body_profiles/*/profile.json` aliases). No per-model table
   is maintained in the plugin.
 - Three background modes are exposed as separate menu items under
-  **File → Plugin Extras**: soft blur / radial blur / solid fill.
+  **File → Plugin Extras** (see "Menu entries" below): soft blur /
+  radial blur / solid fill.
 
 ## Export integration
 
 The plugin also hooks into Lightroom's standard export flow: in
 **File → Export…**, pick **See-Through camera card
-(机型预览卡片（See-Through）)** in the "Export To" dropdown and choose
-a background mode in the panel. Every rendered photo gets a card,
-collected in the plugin's `output/` folder and revealed in Finder when
-the export finishes. (In-app menu titles follow the Lightroom UI
-language; the Chinese labels shown here are from a zh-CN UI.)
+(机型预览卡片（See-Through）)** in the "Export To" dropdown.
+
+![Export dialog](docs/export-dialog.png)
+
+The panel offers:
+
+- **背景模式** (background mode): soft blur / radial blur / solid fill.
+- **机身缩放** (body scale): 1.00×–1.50× slider. The body and the embedded
+  photo scale together as one unit. Per-model caps apply: Nikon Z 9 tops
+  out at 1.28×, other models at 1.50×; rendering additionally clamps so
+  the body never leaves the canvas or covers the caption line.
+
+Rendered cards are saved **next to Lightroom's own export destination** —
+the folder chosen in the export dialog's "Export Location" section — and
+revealed in Finder when the export finishes. (Logs and intermediate files
+stay in the plugin's `output/` folder.) In-app menu titles follow the
+Lightroom UI language; the Chinese labels shown here are from a zh-CN UI.
+
+The result of a 1.50× export:
+
+![Card example](docs/card-example.jpg)
+
+## Menu entries
+
+Single-photo quick generation is also available under
+**File → Plugin Extras → See-Through Camera** — one menu item per
+background mode. Cards land in the plugin's `output/` folder and are
+revealed in Finder.
+
+![Plugin menu](docs/plugin-menu.png)
 
 ## Supported bodies
 
