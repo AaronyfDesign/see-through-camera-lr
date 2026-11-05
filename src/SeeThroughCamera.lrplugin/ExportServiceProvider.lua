@@ -66,7 +66,7 @@ return {
           f:slider {
             value = LrView.bind { table = propertyTable, key = 'bodyScale' },
             min = 1,
-            max = 1.28,
+            max = 1.5,
             integral = false,
             width = 160,
           },
@@ -154,6 +154,21 @@ return {
       end
       dbg('chosen input=' .. tostring(inputPath))
 
+      -- cards go next to LR's own export destination (the folder chosen
+      -- in the export dialog); logs and snapshots stay in the plugin's
+      -- output/ so the photo folder stays clean
+      local cardDir = OUTDIR
+      if pathOrMessage then
+        local parent = LrPathUtils.parent(tostring(pathOrMessage))
+        if parent and parent ~= '' and LrFileUtils.isWritable(parent) then
+          cardDir = parent
+        else
+          dbg('destination parent not writable, fallback to plugin output: '
+            .. tostring(parent))
+        end
+      end
+      dbg('cardDir=' .. cardDir)
+
       if not inputPath then
         if not skipped then
           failures[#failures + 1] = '渲染数据不可用（'
@@ -168,7 +183,7 @@ return {
         if okN and photoName then
           stem = photoName:match('^(.*)%.') or photoName
         end
-        local outPath = LrPathUtils.child(OUTDIR, string.format(
+        local outPath = LrPathUtils.child(cardDir, string.format(
           'card_%s_%s.jpg', LrDate.currentTime(),
           (stem:gsub('[^%w%-_]', '_'))))
         local cmd, which = RENDER.renderCommand(inputPath, outPath, bgMode, bodyScale)
