@@ -26,7 +26,7 @@
 除了快捷菜单，也可以走 Lightroom 的标准导出流程：**文件 → 导出…**，在
 「导出到」下拉里选 **「机型预览卡片（See-Through）」**。
 
-![导出对话框](docs/export-dialog.png)
+<img src="docs/export-dialog.png" width="620" alt="导出对话框">
 
 面板提供两项设置：
 
@@ -42,7 +42,7 @@
 
 1.50× 导出效果：
 
-![卡片示例](docs/card-example.jpg)
+<img src="docs/card-example.jpg" width="400" alt="卡片示例">
 
 ## 快捷菜单
 
@@ -50,7 +50,7 @@
 Camera**，三种背景模式各一个菜单项。卡片保存在插件目录的 `output/`
 下并在完成后自动弹出 Finder。
 
-![插件菜单](docs/plugin-menu.png)
+<img src="docs/plugin-menu.png" width="300" alt="插件菜单">
 
 ## 支持机型
 

@@ -30,7 +30,7 @@ The plugin also hooks into Lightroom's standard export flow: in
 **File → Export…**, pick **See-Through camera card
 (机型预览卡片（See-Through）)** in the "Export To" dropdown.
 
-![Export dialog](docs/export-dialog.png)
+<img src="docs/export-dialog.png" width="620" alt="Export dialog">
 
 The panel offers:
 
@@ -48,7 +48,7 @@ Lightroom UI language; the Chinese labels shown here are from a zh-CN UI.
 
 The result of a 1.50× export:
 
-![Card example](docs/card-example.jpg)
+<img src="docs/card-example.jpg" width="400" alt="Card example">
 
 ## Menu entries
 
@@ -57,7 +57,7 @@ Single-photo quick generation is also available under
 background mode. Cards land in the plugin's `output/` folder and are
 revealed in Finder.
 
-![Plugin menu](docs/plugin-menu.png)
+<img src="docs/plugin-menu.png" width="300" alt="Plugin menu">
 
 ## Supported bodies
 
