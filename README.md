@@ -79,6 +79,7 @@ Kept in sync with `body_profiles/` of
 | Sony α6400 (SONY ILCE-6400) | `a6400` |
 | Sony α6700 (SONY ILCE-6700) | `a6700` |
 | Sony α1 II (SONY ILCE-1M2) | `a1m2` |
+| Sony α7C II (SONY ILCE-7CM2) | `a7c2` |
 | Sony ZV-E10 | `zve10` |
 | Canon EOS 5D Mark IV | `canon5d4` |
 | Canon EOS R5 Mark II | `canonr5ii` |
