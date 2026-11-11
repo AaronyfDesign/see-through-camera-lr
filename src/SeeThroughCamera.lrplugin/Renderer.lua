@@ -15,6 +15,21 @@ local function quote(s)
   return '"' .. s .. '"'
 end
 
+-- Strip the macOS Gatekeeper quarantine flag from the bundled cardgen
+-- binary. Release zips downloaded via a browser carry the quarantine
+-- extended attribute; unsigned ad-hoc binaries are then killed on sight by
+-- Gatekeeper (observed on macOS 26: SIGKILL, LrTasks.execute returns != 0
+-- and the export reports "CLI render failed"). Removing the attribute needs
+-- no user interaction, so the plugin self-heals on first export.
+local function dequarantine(binary)
+  if not (LrPathUtils and binary and binary ~= ''
+          and not binary:find('\\', 1, true)) then
+    return -- non-mac path or no binary: nothing to do
+  end
+  os.execute('/usr/bin/xattr -dr com.apple.quarantine '
+             .. quote(binary) .. ' 2>/dev/null')
+end
+
 local function forExecution(cmd)
   -- On Windows, cmd /c removes the first and last quotes of a quoted command.
   return OUTDIR:find('\\', 1, true) and quote(cmd) or cmd
@@ -27,6 +42,7 @@ local function renderCommand(srcPath, outPath, bgMode, bodyScale)
 
   local binary = CONFIG.binary
   if binary and binary ~= '' and LrFileUtils.exists(binary) then
+    dequarantine(binary)
     local scale = tonumber(bodyScale) or 1.0
     local cmd = table.concat({
       quote(binary), quote(srcPath),
