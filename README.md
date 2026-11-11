@@ -118,6 +118,21 @@ bundles the plugin, the native `cardgen` binary and every body profile -
 no Python, no repo cloning. The installer clears the macOS quarantine
 flag on the bundled binary automatically.
 
+> **About Gatekeeper / "CLI render failed" on macOS:** the bundled
+> `cardgen` is an unsigned (ad-hoc) binary. If you install by dragging
+> the plugin folder into Lightroom's Modules folder yourself — skipping
+> `install.sh` — the quarantine flag from the browser download survives,
+and newer macOS releases kill the binary on launch, which the plugin
+reports as "CLI 渲染失败". Two ways out: run `install.sh` once (it
+clears the flag), or clear it manually:
+>
+> ```sh
+> xattr -dr com.apple.quarantine ~/Library/Application\ Support/Adobe/Lightroom/Modules/SeeThroughCamera.lrplugin/bin/cardgen
+> ```
+>
+> Since the v0.3.7 fix the plugin also strips the flag automatically on
+> every render, so this only affects older releases.
+
 **Option B: install from a clone.** Clone this repo and the
 see-through-camera repo (sibling directory is auto-detected), then run:
 

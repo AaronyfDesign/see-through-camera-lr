@@ -106,6 +106,19 @@ ZIP 内已内置插件、原生 `cardgen` 二进制和全部机型 profile，无
 Python、无需克隆仓库。安装器会自动清除 macOS 给内置二进制打的
 隔离标记（quarantine）。
 
+> **关于 Gatekeeper / macOS 上报「CLI 渲染失败」：** 包内的 `cardgen`
+> 是未签名（ad-hoc）二进制。如果你手动拖拽插件文件夹到 Lightroom 的
+> Modules 目录（跳过了 `install.sh`），浏览器下载带来的隔离标记会
+> 一直保留，较新的 macOS 会直接拦截二进制运行，插件就会报
+> 「CLI 渲染失败」。两种解决办法：跑一次 `install.sh`（会清除标记），
+> 或手动清除：
+>
+> ```sh
+> xattr -dr com.apple.quarantine ~/Library/Application\ Support/Adobe/Lightroom/Modules/SeeThroughCamera.lrplugin/bin/cardgen
+> ```
+>
+> v0.3.7 起插件在每次渲染前也会自动清除该标记，此问题仅影响旧版本。
+
 **方式 B：从仓库安装。** 克隆本仓库与 see-through-camera 仓库
 （同级目录可被自动发现）后运行：
 
